@@ -1,0 +1,13 @@
+{
+  "name": "razo-demo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Demo repo for razo: narrated Playwright tests + razo.ar dashboard + PR comments",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@razohq/razo": "^0.2.0"
+  }
+}

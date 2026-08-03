@@ -1,0 +1,26 @@
+name: e2e
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      # Upload with if: always() — failing runs are the interesting ones.
+      # razo-upload reads GITHUB_* env automatically (branch, commit, PR number),
+      # which is what lets razo.ar post its analysis back on the pull request.
+      - name: Upload to razo
+        if: always()
+        run: npx razo-upload --url https://razo.ar/api/ingest
+        env:
+          RAZO_INGEST_TOKEN: ${{ secrets.RAZO_INGEST_TOKEN }}
