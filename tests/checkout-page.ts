@@ -22,11 +22,10 @@ export const CHECKOUT_PAGE = `
     <thead><tr><th>Item</th><th>Price</th></tr></thead>
     <tbody>
       <tr><td>Keyboard</td><td>$45.00</td></tr>
-      <tr><td>Mouse</td><td>$5.00</td></tr>
     </tbody>
   </table>
 
-  <button data-testid="place-order"
+  <button data-testid="place-order" style="display:none"
     onclick="document.querySelector('[data-testid=status]').textContent='Order placed'">
     Place order
   </button>
