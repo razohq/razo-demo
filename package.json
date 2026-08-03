@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "@razohq/razo": "^0.2.0"
+    "@razohq/razo": "^0.2.0",
+    "@razohq/razo-analyzer": "^0.1.0"
   }
 }
