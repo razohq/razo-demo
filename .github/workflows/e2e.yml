@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  # Nightly on main, so there is a run per day even when nobody pushes:
+  # that history is what razo's triage reads to tell a regression from a flake.
+  schedule:
+    - cron: '0 3 * * *'
 
 jobs:
   test:
@@ -27,3 +31,15 @@ jobs:
         run: npx razo-upload --url https://razo.ar/api/ingest
         env:
           RAZO_INGEST_TOKEN: ${{ secrets.RAZO_INGEST_TOKEN }}
+
+      # Keep the raw razo-steps.json of every run, green ones included: a green
+      # run is the "last known good" a later failure gets compared against.
+      # One artifact per attempt so re-runs never overwrite each other.
+      - name: Keep test-results as an artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: razo-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          retention-days: 30
+          if-no-files-found: warn
