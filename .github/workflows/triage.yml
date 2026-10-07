@@ -1,0 +1,79 @@
+name: triage
+
+# The morning triage: once the nightly e2e run on main has finished, read the
+# last two weeks of runs, cluster and classify the failures, and deliver the
+# report to razo.ar's Triage tab. The engine is @razohq/triage, built from
+# razohq/razo because it is not published to npm yet.
+on:
+  workflow_run:
+    workflows: [e2e]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# One triage at a time: two overlapping runs would each restore the same state
+# and upload two diverging ones.
+concurrency:
+  group: razo-triage
+  cancel-in-progress: false
+
+permissions:
+  actions: read     # list the e2e runs and download their artifacts and the previous state
+  contents: read    # compare commits and read their diffs
+
+jobs:
+  triage:
+    # Only after the nightly, not after every push or PR run of e2e.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.event == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: razohq/razo
+          path: .razo-engine
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: .razo-engine/package-lock.json
+
+      - name: Build the triage engine
+        working-directory: .razo-engine
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: |
+          npm ci
+          npm run build -w @razohq/triage
+
+      # Restores the previous state from the latest razo-triage-state artifact
+      # of a main-branch run, then downloads the e2e runs it has not seen yet.
+      - name: Pull runs and state
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RAZO_INGEST_TOKEN: ${{ secrets.RAZO_INGEST_TOKEN }}
+        run: node .razo-engine/packages/triage/dist/cli.js pull --config .github/triage/triage.config.yaml --since 14d
+
+      - name: Triage the last day
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RAZO_INGEST_TOKEN: ${{ secrets.RAZO_INGEST_TOKEN }}
+        run: node .razo-engine/packages/triage/dist/cli.js run --config .github/triage/triage.config.yaml --since 24h --lookback 14d
+
+      # Saved only when the morning was delivered: triage run fails before
+      # saving anything if a notifier fails, and this step does not run then.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: razo-triage-state
+          path: .razo/triage-state.json
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: triage-report-${{ github.run_id }}
+          path: triage-reports/
+          retention-days: 30
+          if-no-files-found: ignore

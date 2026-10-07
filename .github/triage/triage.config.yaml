@@ -1,0 +1,22 @@
+# Morning triage for this repository, run by .github/workflows/triage.yml.
+# Paths are relative to the repository root, where the workflow runs the CLI.
+baseBranch: main
+source:
+  plugin: razo-source
+  config: { dataDir: .razo }
+pull:
+  repo: razohq/razo-demo
+  token: "${GITHUB_TOKEN}"
+  workflow: e2e.yml
+  branch: main
+code:
+  plugin: github
+  config: { repo: razohq/razo-demo, token: "${GITHUB_TOKEN}" }
+notifiers:
+  - plugin: markdown
+    config: { outDir: triage-reports }
+  - plugin: http
+    config: { url: "https://razo.ar/api/triage/reports", token: "${RAZO_INGEST_TOKEN}" }
+store:
+  plugin: json-file
+  config: { path: .razo/triage-state.json }
