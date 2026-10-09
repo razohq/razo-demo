@@ -20,3 +20,7 @@ notifiers:
 store:
   plugin: json-file
   config: { path: .razo/triage-state.json }
+# Decisions taken on the dashboard's Triage tab; triage pull records them and the next run applies them.
+decisions:
+  url: "https://razo.ar/api/triage/decisions"
+  token: "${RAZO_INGEST_TOKEN}"
