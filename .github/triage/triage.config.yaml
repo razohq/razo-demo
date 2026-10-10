@@ -17,6 +17,10 @@ notifiers:
     config: { outDir: triage-reports }
   - plugin: http
     config: { url: "https://razo.ar/api/triage/reports", token: "${RAZO_INGEST_TOKEN}" }
+# Read only: links each failure to the GitHub issue whose body has its `razo-triage: <id>` line.
+tracker:
+  plugin: github
+  config: { repo: razohq/razo-demo, token: "${GITHUB_TOKEN}" }
 store:
   plugin: json-file
   config: { path: .razo/triage-state.json }

@@ -20,6 +20,7 @@ concurrency:
 permissions:
   actions: read     # list the e2e runs and download their artifacts and the previous state
   contents: read    # compare commits and read their diffs
+  issues: read      # find the issues that track each failure (the tracker never writes)
 
 jobs:
   triage:
