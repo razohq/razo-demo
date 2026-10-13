@@ -13,7 +13,7 @@ export const CHECKOUT_PAGE = `
   <label>Coupon <input data-testid="coupon" /></label>
   <button data-testid="apply-coupon"
     onclick="document.querySelector('[data-testid=discount]').textContent =
-      document.querySelector('[data-testid=coupon]').value === 'SAVE10' ? '-$4.00' : 'Invalid coupon'">
+      document.querySelector('[data-testid=coupon]').value === 'SAVE10' ? '-$5.00' : 'Invalid coupon'">
     Apply
   </button>
   <p data-testid="discount"></p>
@@ -26,7 +26,7 @@ export const CHECKOUT_PAGE = `
     </tbody>
   </table>
 
-  <button data-testid="place-order" style="display:none"
+  <button data-testid="place-order"
     onclick="document.querySelector('[data-testid=status]').textContent='Order placed'">
     Place order
   </button>
